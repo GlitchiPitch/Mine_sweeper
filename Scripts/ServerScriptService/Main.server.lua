@@ -1,11 +1,12 @@
 local ServerScriptService = game:GetService("ServerScriptService")
+local ServerStorage = game:GetService("ServerStorage")
 
 local Cell = require(ServerScriptService.Modules.Cell)
 
 local Field = Instance.new('Folder')
 Field.Parent = workspace
 
-local VALUE = 10
+-- local VALUE = 10
 
 -- for x = 1, VALUE do
 --     for z = 1, VALUE do

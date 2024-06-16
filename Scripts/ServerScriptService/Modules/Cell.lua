@@ -1,3 +1,14 @@
+--[[
+	build a lobby and game place where mine field will be created
+	delete all generate functions and add those object into workspace like modls etc.
+		-- 103 line
+		-- 170 line
+
+	add restart function
+		-- clear tables and destroy objects
+]]
+
+
 local CELL_COUNT = 10
 local MINES_COUNT = 10
 
@@ -5,7 +16,6 @@ local VALUE = 10
 
 local Field = Instance.new('Folder')
 Field.Parent = workspace
-
 
 local CANDIDATE_MINE_COLOR = Color3.new(0.9, 0.9, 0.05)
 local DEFAULT_COLOR = Color3.new(0.07, 0.8, 0.4)
@@ -17,6 +27,7 @@ local Cell = {}
 Cell.__index = Cell
 
 Cell.All = {}
+
 function Cell.new(x, z)
 	local self = setmetatable({}, Cell)
 	self.IsMine = false
@@ -94,6 +105,7 @@ function Cell:SurroundedMines()
     return counter
 end
 
+-- this function remake to getPromptsFromCloneTemplate
 function Cell:CreatePrompts(part)
 	local mineCanAtt = Instance.new("Attachment")
 	mineCanAtt.Parent = part
@@ -107,7 +119,7 @@ function Cell:CreatePrompts(part)
 	mineCandidate.KeyboardKeyCode = Enum.KeyCode.M
 	mineCandidate.ActionText = ""
     mineCandidate.MaxActivationDistance = 10
-	mineCandidate.Triggered:Connect(function(playerWhoTriggered)
+	mineCandidate.Triggered:Connect(function()
 		self:MineCandidateAction()
 	end)
 
@@ -116,7 +128,7 @@ function Cell:CreatePrompts(part)
 	open.KeyboardKeyCode = Enum.KeyCode.N
 	open.ActionText = ""
     open.MaxActivationDistance = 10
-	open.Triggered:Connect(function(playerWhoTriggered)
+	open.Triggered:Connect(function()
 		if self.IsMine then
 			self:MineAction()
 		else
@@ -156,6 +168,7 @@ function Cell:OpenAction()
 	self.IsOpened = true
 end
 
+-- remake this function to get from clone template
 function Cell:ShowSurroundedGui(text)
 	local gui = Instance.new("BillboardGui")
 	gui.Parent = self.CellObject
@@ -179,12 +192,11 @@ function Cell:SetupObject(part, x, z)
 end
 
 function Cell:RandomizeMines()
-	local allCells = Cell.All
+	local allCells = table.clone(Cell.All)
 	local pickedCells = {}
 
 	for i = 1, MINES_COUNT do
         local index = math.random(#allCells)
-        print(#allCells)
 		local currCell = allCells[index]
 		table.remove(allCells, table.find(allCells, currCell, 1))
 		table.insert(pickedCells, index)
@@ -192,7 +204,7 @@ function Cell:RandomizeMines()
 
 	for _, pickedCell in pairs(pickedCells) do
         Cell.All[pickedCell].IsMine = true
-		Cell.All[pickedCell].CellObject.Color = Color3.new(1, 0, 0)
+		-- Cell.All[pickedCell].CellObject.Color = Color3.new(1, 0, 0)
 	end
 end
 

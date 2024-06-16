@@ -2,26 +2,17 @@
   "name": "MineSweepers",
   "tree": {
     "$className": "DataModel",
-
     "ReplicatedStorage": {
-        "$className" : "ReplicatedStorage",
-        "$path": "Scripts/Replicated"
+      "$className": "ReplicatedStorage",
+      "$path": "Scripts/ReplicatedStorage"
     },
-
     "ServerScriptService": {
-        "$className" : "ServerScriptService",
-        "$path": "Scripts/Server"
+      "$className": "ServerScriptService",
+      "$path": "Scripts/ServerScriptService"
     },
-
-    "StarterPlayer": {
-      "StarterPlayerScripts": {
-          "$className" : "StarterPlayerScripts",
-          "$path": "Scripts/Client/Player"
-      },
-      "StarterCharacterScripts": {
-        "$className" : "StarterCharacterScripts",
-        "$path" : "Scripts/Client/Character"
-      }
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "$path": "Scripts/ServerStorage"
     }
   }
 }
