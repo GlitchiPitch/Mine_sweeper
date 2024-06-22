@@ -5,7 +5,7 @@ local modules = serverScriptService.Modules
 
 local cell = require(modules.Cell)
 local config = require(modules.Configs)
-local field = workspace.Mines
+local field: Folder = workspace.Mines
 local mineTemp = serverStorage.Mine
 
 local allCells = {}
@@ -34,6 +34,20 @@ function randomizeMines()
 	end
 end
 
-createField()
-setupCells()
-randomizeMines()
+function onCharacterAdded(character: Model)
+
+    createField()
+    setupCells()
+    randomizeMines()
+
+    local humanoid: Humanoid = character:WaitForChild('Humanoid')
+    humanoid.Died:Connect(function() field:ClearAllChildren() end)
+
+end
+
+function onPlayerAdded(player: Player)
+    player.CharacterAdded:Connect(onCharacterAdded)
+end
+
+game.Players.PlayerAdded:Connect(onPlayerAdded)
+

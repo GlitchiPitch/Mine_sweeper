@@ -40,8 +40,7 @@ function getCellByAxis(allCells, x, z)
 	end
 end
 
-local Cell = {}
-Cell.__index = Cell
+local Cell = {}; Cell.__index = Cell
 
 function Cell.new(x, z, obj: BasePart)
 	local self = setmetatable({}, Cell)
@@ -80,9 +79,7 @@ function Cell:init(field: Folder, allCells: {})
 			local surroundedMines = 0
 			for _, cellIndex in surroundedCellIndexies do
 				local cell = getCellByAxis(allCells, self.x + cellIndex[1], self.z + cellIndex[2])
-				if cell and cell.isMine.Value then
-					surroundedMines += 1
-				end
+				if cell and cell.isMine.Value then surroundedMines += 1 end
 			end
 
 			if surroundedMines == 0 then
@@ -99,32 +96,19 @@ function Cell:init(field: Folder, allCells: {})
 	end)
 
 	mineCandidate.Triggered:Connect(function()
-		self:mineCandidateAction()
+		self.isMineCandidate.Value = not self.isMineCandidate.Value
 	end)
 
 	open.Triggered:Connect(function()
 		if self.isMine.Value then
-			self:mineAction()
+			createExplosion(self.object)
+			self.object.BrickColor = configs.mineColor
+			local mineImage: ImageLabel = self.gui.Mine
+			mineImage.Visible = true
 		else
-			self:openAction()
+			self.isOpened.Value = true
 		end
 	end)
-end
-
-function Cell:mineAction()
-	createExplosion(self.object)
-	self.object.BrickColor = configs.mineColor
-	local mineImage: ImageLabel = self.gui.Mine
-	mineImage.Visible = true
-	-- reload
-end
-
-function Cell:mineCandidateAction()
-	self.isMineCandidate.Value = not self.isMineCandidate.Value
-end
-
-function Cell:openAction()
-	self.isOpened.Value = true
 end
 
 -- add surface gui into mine template
@@ -132,7 +116,6 @@ function Cell:showSurroundedGui(text)
 	local textLabel: TextLabel = self.gui.Count
 	textLabel.Visible = true
 	textLabel.Text = text
-
 end
 
 return Cell
