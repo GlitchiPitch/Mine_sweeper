@@ -1,18 +1,5 @@
---[[
-	build a lobby and game place where mine field will be created
-	delete all generate functions and add those object into workspace like modls etc.
-		-- 103 line
-		-- 170 line
-
-	add restart function
-		-- clear tables and destroy objects
-]]
--- export type Mine: {
--- 	mineCandidatePrompt: ProximityPrompt,
--- 	openPrompt: ProximityPrompt,
--- }
 local serverScriptService = game:GetService("ServerScriptService")
-local configs = require(serverScriptService.Modules.Configs)
+local config = require(serverScriptService.Modules.Config)
 local surroundedCellIndexies = {
 	{ -1, -1 },
 	{ -1, 0 },
@@ -23,6 +10,19 @@ local surroundedCellIndexies = {
 	{ 1, 1 },
 	{ 0, 1 },
 }
+
+local data: {
+	field: Folder,
+	mineTemp: Part & {
+		MineCandidate: ProximityPrompt,
+		Open: ProximityPrompt,
+	},
+	fieldSpawnPoint: Part,
+}
+
+local allCells = {}
+local level = 0
+local startPoint: Vector3
 
 function createExplosion(object: BasePart)
 	local exploison = Instance.new("Explosion")
@@ -42,13 +42,14 @@ end
 
 local Cell = {}; Cell.__index = Cell
 
-function Cell.new(x, z, obj: BasePart)
+function Cell.new(x, z)
 	local self = setmetatable({}, Cell)
-	self.object = obj
-	self.isMine = obj.IsMine :: BoolValue
-	self.isOpened = obj.IsOpened :: BoolValue
-	self.isMineCandidate = obj.IsMineCandidate :: BoolValue
-	self.gui = obj.Surface :: SurfaceGui
+	
+	self.object = data.mineTemp:Clone()
+	self.isMine = self.object.IsMine :: BoolValue
+	self.isOpened = self.object.IsOpened :: BoolValue
+	self.isMineCandidate = self.object.IsMineCandidate :: BoolValue
+	self.gui = self.object.Surface :: SurfaceGui
 
 	self.x = x
 	self.z = z
@@ -56,9 +57,9 @@ function Cell.new(x, z, obj: BasePart)
 	return self
 end
 
-function Cell:init(field: Folder, allCells: {})
-	self.object.Parent = field
-	self.object.Position = Vector3.new(self.x * self.object.Size.X, 5, self.z * self.object.Size.Z)
+function Cell:init()
+	self.object.Parent = data.field
+	self.object.Position = Vector3.new(self.x * self.object.Size.X, 0, self.z * self.object.Size.Z) + startPoint
 
 	local mineCandidate: ProximityPrompt = self.object.MineCandidate.ProximityPrompt
 	local open: ProximityPrompt = self.object.Open.ProximityPrompt
@@ -66,7 +67,7 @@ function Cell:init(field: Folder, allCells: {})
 	self.isMineCandidate.Changed:Connect(function(value: boolean)
 		local mineCandidateImage: ImageLabel = self.gui.MineCandidate
 		mineCandidateImage.Visible = value
-		self.object.BrickColor = value and configs.candidateMineColor or configs.defaultColor
+		self.object.BrickColor = value and config.candidateMineColor or config.defaultColor
 	end)
 
 	self.isOpened.Changed:Connect(function(value: boolean)
@@ -75,7 +76,7 @@ function Cell:init(field: Folder, allCells: {})
 			mineCandidate.Enabled = false
 			open.Enabled = false
 
-			self.object.BrickColor = configs.openedColor
+			self.object.BrickColor = config.openedColor
 			local surroundedMines = 0
 			for _, cellIndex in surroundedCellIndexies do
 				local cell = getCellByAxis(allCells, self.x + cellIndex[1], self.z + cellIndex[2])
@@ -102,9 +103,12 @@ function Cell:init(field: Folder, allCells: {})
 	open.Triggered:Connect(function()
 		if self.isMine.Value then
 			createExplosion(self.object)
-			self.object.BrickColor = configs.mineColor
+			self.object.BrickColor = config.mineColor
 			local mineImage: ImageLabel = self.gui.Mine
 			mineImage.Visible = true
+
+			task.wait(5)
+			createField()
 		else
 			self.isOpened.Value = true
 		end
@@ -118,4 +122,48 @@ function Cell:showSurroundedGui(text)
 	textLabel.Text = text
 end
 
-return Cell
+function createField()
+
+	for i, player in game.Players:GetPlayers() do
+		player:LoadCharacter()
+	end
+
+	data.field:ClearAllChildren()
+	allCells = {}
+	
+    local fs = 10 + level
+	local mineCount = math.floor(fs ^ 2 / 3)
+
+	startPoint = Vector3.new(-(fs * data.mineTemp.Size.X / 2),0,-(fs * data.mineTemp.Size.Z / 2))
+    for x = 1, fs do
+        for z = 1, fs do
+            table.insert(allCells, Cell.new(x, z))
+        end
+    end
+    
+    -- setup cells
+    for i, cell in allCells do
+		cell:init(data.field, allCells)
+    end
+    
+    -- randomize mines
+    for i = 1, mineCount do
+        local index = math.random(#allCells)
+        allCells[index].isMine.Value = true
+        allCells[index].object.BrickColor = config.mineColor
+	end
+
+	level += 1
+	if level > 20 then
+		level = 0
+	end
+end
+
+function init(data_)
+	data = data_
+end
+
+return {
+	init = init,
+	createField = createField,
+}
