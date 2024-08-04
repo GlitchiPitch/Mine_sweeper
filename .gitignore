@@ -1,6 +1,12 @@
 # Project place file
-/HW_ver2.rbxlx
+/*.rbxl
 
 # Roblox Studio lock files
 /*.rbxlx.lock
 /*.rbxl.lock
+.gitignore
+/*.json
+/*.toml
+
+/*.ini
+

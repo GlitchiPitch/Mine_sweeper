@@ -1,6 +1,0 @@
-{
-    "robloxLsp.diagnostics.globals": [
-        "mineCandidatePrompt",
-        "export"
-    ]
-}
