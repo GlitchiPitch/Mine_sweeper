@@ -171,7 +171,6 @@ function createField(upgrade: boolean)
     for i = 1, mineCount do
         local index = math.random(#allCells)
         allCells[index].isMine.Value = true
-		allCells[index].object.BrickColor = BrickColor.Red()
 	end
 
 	level += upgrade and 1 or 0
