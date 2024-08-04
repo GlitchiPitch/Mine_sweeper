@@ -40,6 +40,15 @@ function getCellByAxis(allCells, x, z)
 	end
 end
 
+function checkWin()
+	for i, cell in allCells do
+		if (not cell.isOpened.Value and not cell.isMine.Value) or (cell.isMine.Value and not cell.isMineCandidate.Value) then
+			return false
+		end
+	end
+	return true
+end
+
 local Cell = {}; Cell.__index = Cell
 
 function Cell.new(x, z)
@@ -109,9 +118,12 @@ function Cell:init()
 			mineImage.Visible = true
 
 			task.wait(5)
-			createField()
+			createField(false)
 		else
 			self.isOpened.Value = true
+			if checkWin() then
+				createField(true)
+			end
 		end
 	end)
 end
@@ -123,10 +135,18 @@ function Cell:showSurroundedGui(text)
 	textLabel.Text = text
 end
 
-function createField()
+function createField(upgrade: boolean)
 
 	for i, player in game.Players:GetPlayers() do
 		player:LoadCharacter()
+		local leaderstats = player:FindFirstChild('leaderstats')
+		if upgrade == true then
+			local wins = leaderstats:FindFirstChild('Wins') :: IntValue
+			wins.Value += 1
+		elseif upgrade == false then
+			local losses = leaderstats:FindFirstChild('Losses') :: IntValue
+			losses.Value += 1
+		end
 	end
 
 	data.field:ClearAllChildren()
@@ -151,10 +171,10 @@ function createField()
     for i = 1, mineCount do
         local index = math.random(#allCells)
         allCells[index].isMine.Value = true
-        allCells[index].object.BrickColor = config.mineColor
+		allCells[index].object.BrickColor = BrickColor.Red()
 	end
 
-	level += 1
+	level += upgrade and 1 or 0
 	if level > 20 then
 		level = 0
 	end

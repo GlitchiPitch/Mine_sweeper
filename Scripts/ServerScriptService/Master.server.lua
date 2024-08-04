@@ -9,6 +9,10 @@ local field: Folder = workspace.Mines
 local mineTemp: Part = serverStorage.Mine
 local fieldSpawnPoint = workspace.FieldSpawnPoint
 
+function onPlayerAdded(player: Player)
+    game.ServerStorage.leaderstats:Clone().Parent = player
+end
+
 function init()
     mineTemp.BrickColor = config.defaultColor
     mineSweeper.init({
@@ -19,4 +23,5 @@ function init()
     mineSweeper.createField()
 end
 
+game.Players.PlayerAdded:Connect(onPlayerAdded)
 init()
