@@ -58,6 +58,7 @@ function Cell.new(x, z)
 end
 
 function Cell:init()
+	self.object.BrickColor = BrickColor.new("Medium green")
 	self.object.Parent = data.field
 	self.object.Position = Vector3.new(self.x * self.object.Size.X, 0, self.z * self.object.Size.Z) + startPoint
 
